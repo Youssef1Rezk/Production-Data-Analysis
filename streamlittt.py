@@ -7,7 +7,9 @@ import streamlit as st
 import matplotlib.animation as animation
 from datetime import datetime
 from scipy.optimize import curve_fit
-
+from PIL import Image
+import requests
+from io import BytesIO
 
 
 # Load the data
@@ -16,8 +18,14 @@ excel_file_url = 'https://raw.githubusercontent.com/Youssef1Rezk/Production-Data
 
 # Read the Excel file
 df = pd.read_excel(excel_file_url)
+# GitHub raw content URL of the image
+image_url = 'https://raw.githubusercontent.com/Youssef1Rezk/Production-Data-Analysis/main/spe-logo-blue.png__314x181_q85_subsampling-2.png'
+
+# Use requests to retrieve the image from the GitHub URL
+response = requests.get(image_url)
+image = Image.open(BytesIO(response.content))
 # Display logo
-st.sidebar.image('D:\science fair\images\spe-logo-blue.png__314x181_q85_subsampling-2.png', use_column_width=True)
+st.sidebar.image(image,  use_column_width=True)
 # Add title and description
 st.title("Production Data Analysis")
 st.write("""
