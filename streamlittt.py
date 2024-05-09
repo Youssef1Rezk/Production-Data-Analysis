@@ -5,8 +5,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns 
 import streamlit as st
 import matplotlib.animation as animation
-import ipywidgets as widgets
-from ipywidgets import interact
 from datetime import datetime
 from IPython.display import display, clear_output
 from scipy.optimize import curve_fit
