@@ -12,6 +12,7 @@ from scipy.optimize import curve_fit
 
 # Load the data
 df = pd.read_excel(r"D:\science fair\Volve production data.xlsx")
+uploaded_file = st.file_uploader("D:\science fair\Volve production data.xlsx", type=["xlsx"])
 # Display logo
 st.sidebar.image('D:\science fair\images\spe-logo-blue.png__314x181_q85_subsampling-2.png', use_column_width=True)
 # Add title and description
