@@ -11,7 +11,11 @@ from scipy.optimize import curve_fit
 
 
 # Load the data
-df = pd.read_excel(r"D:\science fair\Volve production data.xlsx")
+# GitHub raw content URL of the Excel file
+excel_file_url = 'https://raw.githubusercontent.com/Youssef1Rezk/Production-Data-Analysis/main/Volve%20production%20data.xlsx'
+
+# Read the Excel file
+df = pd.read_excel(excel_file_url)
 # Display logo
 st.sidebar.image('D:\science fair\images\spe-logo-blue.png__314x181_q85_subsampling-2.png', use_column_width=True)
 # Add title and description
