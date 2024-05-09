@@ -6,7 +6,6 @@ import seaborn as sns
 import streamlit as st
 import matplotlib.animation as animation
 from datetime import datetime
-from IPython.display import display, clear_output
 from scipy.optimize import curve_fit
 
 
