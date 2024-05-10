@@ -21,11 +21,11 @@ def add_bg_from_url():
     st.markdown(
         f"""
         <style>
-        .stApp {{
+        .main {{
             background-image: url("https://raw.githubusercontent.com/Youssef1Rezk/Production-Data-Analysis/2b8b49a8370e73a47617460edadebfc13b5e386b/6436964_3293677.jpg");
             background-size: cover;
             background-position: center;
-            background-attachment: scroll;
+            background-attachment: local;
         }}
         </style>
         """,
@@ -33,6 +33,7 @@ def add_bg_from_url():
     )
 
 add_bg_from_url()
+
 
 
 # Load the data
