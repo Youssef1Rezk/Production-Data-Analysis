@@ -15,7 +15,22 @@ from PIL import Image
 import requests
 from io import BytesIO
 import streamlit.components.v1 as components
+# Function to fetch image from a URL
+def add_bg_from_url():
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("https://raw.githubusercontent.com/Youssef1Rezk/Production-Data-Analysis/2b8b49a8370e73a47617460edadebfc13b5e386b/6436964_3293677.jpg");
+            background-size: cover;
+            background-position: center;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
+add_bg_from_url()
 
 # Load the data
 # GitHub raw content URL of the Excel file
@@ -132,21 +147,23 @@ def plot_production_profile(well_bore_code, df):
     fig.for_each_trace(lambda t: t.update(name=t.name.replace("BORE_OIL_VOL=", "Oil Volume")))
     fig.for_each_trace(lambda t: t.update(name=t.name.replace("BORE_WAT_VOL=", "Water Volume")))
     
+    # Update layout to control the size and position
     fig.update_layout(
+        width=700,  # Adjust the width of the chart
+        height=500,  # Adjust the height of the chart
         plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
         paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
-        margin=dict(l=20, r=20, t=40, b=20),
+        margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
         font=dict(family="Arial", size=12, color="black"),
         xaxis=dict(linecolor='black', linewidth=2, mirror=True),
         yaxis=dict(linecolor='black', linewidth=2, mirror=True),
         legend=dict(title='Production Type', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
         title=dict(font=dict(size=16, color='black')),
         hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
-        hovermode="closest",
-        autosize=True,  # Make the figure responsive
+        hovermode="closest"
     )
 
-    # Convert the Plotly figure to HTML and store it in a variable
+   # Convert the Plotly figure to HTML and store it in a variable
     fig_html = fig.to_html()
 
     # Custom HTML and CSS to create a container with rounded corners
@@ -157,8 +174,8 @@ def plot_production_profile(well_bore_code, df):
     """
 
     # Use Streamlit's HTML component to render the custom container
-    components.html(rounded_corner_container, height=600)
-    
+    components.html(rounded_corner_container, height=600,width=900)
+
 
 
 # Define a function to plot total production by year with a date range slider
@@ -189,7 +206,7 @@ def plot_total_production_by_year_with_slider(df):
     fig.update_layout(
         plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
         paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
-        margin=dict(l=20, r=20, t=40, b=20),
+        margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
         font=dict(family="Arial", size=12, color="black"),
         xaxis=dict(linecolor='black', linewidth=2, mirror=True),
         yaxis=dict(linecolor='black', linewidth=2, mirror=True),
@@ -240,7 +257,7 @@ def plot_total_production_by_year_with_slider2(df):
     fig.update_layout(
         plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
         paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
-        margin=dict(l=20, r=20, t=40, b=20),
+        margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame,
         font=dict(family="Arial", size=12, color="black"),
         xaxis=dict(linecolor='black', linewidth=2, mirror=True),
         yaxis=dict(linecolor='black', linewidth=2, mirror=True),
@@ -269,7 +286,21 @@ def get_base64_of_bin_file(bin_file):
         data = file.read()
     return base64.b64encode(data).decode()
 
+# Function to set the background image
+def set_background(png_file):
+    bin_str = get_base64_of_bin_file(png_file)
+    background_style = f"""
+    <style>
+    .stApp {{
+        background-image: url("data:image/png;base64,{bin_str}");
+        background-size: cover;
+    }}
+    </style>
+    """
+    st.markdown(background_style, unsafe_allow_html=True)
 
+# Set a background image
+set_background(r'D:\science fair\images\pexels-danbuilds-633409.jpg')
 # Create a sidebar radio button for navigation
 selected_page = st.sidebar.radio(
     "Navigation",
@@ -371,7 +402,7 @@ elif selected_page == "Part 2":
     fig.update_layout(
     plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
     paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
-    margin=dict(l=20, r=20, t=40, b=20),
+    margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
     font=dict(family="Arial", size=12, color="black"),
     xaxis_title="Well Name",
     yaxis_title="Percentage Contribution",
@@ -417,7 +448,7 @@ elif selected_page == "Part 2":
     fig.update_layout(
         plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
         paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
-        margin=dict(l=20, r=20, t=40, b=20),
+        margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame,
         font=dict(family="Arial", size=12, color="black"),
         xaxis_title="Total Production",
         yaxis_title="Well Name",
@@ -517,7 +548,7 @@ elif selected_page == "part 3":
         fig.update_layout(
             plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
             paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
-            margin=dict(l=20, r=20, t=40, b=20),
+            margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
             font=dict(family="Arial", size=12, color="black"),
             xaxis=dict(linecolor='black', linewidth=2, mirror=True),
             yaxis=dict(linecolor='black', linewidth=2, mirror=True),
@@ -586,7 +617,7 @@ elif selected_page == "part 3":
         fig.update_layout(
             plot_bgcolor='rgba(255, 255, 255, .9)',  # Glassy white background
             paper_bgcolor='rgba(0, 71, 171, .5)',  # Semi-transparent white background
-            margin=dict(l=20, r=20, t=40, b=20),
+            margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
             font=dict(family="Arial", size=12, color="black"),
             xaxis=dict(linecolor='black', linewidth=2, mirror=True),
             yaxis=dict(linecolor='black', linewidth=2, mirror=True),
@@ -616,7 +647,7 @@ elif selected_page == "part 3":
         fig.update_layout(
             plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
             paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
-            margin=dict(l=20, r=20, t=40, b=20),
+            margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
             font=dict(family="Arial", size=12, color="black"),
             xaxis=dict(linecolor='black', linewidth=2, mirror=True),
             yaxis=dict(linecolor='black', linewidth=2, mirror=True),
