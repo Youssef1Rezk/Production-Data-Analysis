@@ -47,12 +47,15 @@ image = Image.open(BytesIO(response.content))
 # Display logo
 st.sidebar.image(image,  use_column_width=True)
 # Add title and description
-st.title("Production Data Analysis")
-st.write("""
-         ## Explore the production data from Volve field
-         Welcome to the Volve Field production data analysis app! 
-         Here, you can explore various insights derived from the production data.
-         """)
+st.markdown("""
+             <h1 style='color: white; text-align: center;'>Volve Field Production Data Analysis</h1>
+             <h2 style='color: white; text-align: center;'>Welcome to the SPE Science Fair!</h2>
+             <p style='color: white; text-align: center;'>
+             Explore the production data from the Volve field in this interactive analysis app. 
+             Dive into various insights and discover patterns within the production data.
+             </p>
+             """, unsafe_allow_html=True)
+
 
 # some functiions needed:
 # Define the color list for the plot
@@ -149,8 +152,6 @@ def plot_production_profile(well_bore_code, df):
     
     # Update layout to control the size and position
     fig.update_layout(
-        width=700,  # Adjust the width of the chart
-        height=500,  # Adjust the height of the chart
         plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
         paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
         margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
@@ -174,7 +175,7 @@ def plot_production_profile(well_bore_code, df):
     """
 
     # Use Streamlit's HTML component to render the custom container
-    components.html(rounded_corner_container, height=600,width=900)
+    components.html(rounded_corner_container, height=600,width=800)
 
 
 
@@ -227,7 +228,7 @@ def plot_total_production_by_year_with_slider(df):
     """
 
     # Use Streamlit's HTML component to render the custom container
-    components.html(rounded_corner_container, height=600)
+    components.html(rounded_corner_container, height=600 ,width=800)
 
 # Define a function to plot total production by year with a date range slider
 def plot_total_production_by_year_with_slider2(df):
@@ -278,7 +279,7 @@ def plot_total_production_by_year_with_slider2(df):
     """
 
     # Use Streamlit's HTML component to render the custom container
-    components.html(rounded_corner_container, height=600)
+    components.html(rounded_corner_container, height=600 ,width=800)
 
 # Function to get base64 of the binary file
 def get_base64_of_bin_file(bin_file):
@@ -289,7 +290,7 @@ def get_base64_of_bin_file(bin_file):
 # Create a sidebar radio button for navigation
 selected_page = st.sidebar.radio(
     "Navigation",
-    ["Show Data", "Part 1", "Part 2","part 3"]
+    ["Show Data", "Part 1", "Part 2","part 3","About the Project"]
 )
 
 # Show Data page
@@ -387,14 +388,14 @@ elif selected_page == "Part 2":
     fig.update_layout(
     plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
     paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
-    margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
-    font=dict(family="Arial", size=12, color="black"),
+    margin=dict(l=60, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
+    font=dict(family="Arial", size=12, color="white"),
     xaxis_title="Well Name",
     yaxis_title="Percentage Contribution",
     yaxis=dict(tickformat=".2f"),
     coloraxis_colorbar=dict(title='Percentage Contribution'),  # Add a color bar title
     legend=dict(title='Production Type', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
-    title=dict(font=dict(size=16, color='black')),
+    title=dict(font=dict(size=16, color='white')),
     hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
     hovermode="closest"
  )
@@ -410,7 +411,7 @@ elif selected_page == "Part 2":
     """
 
     # Use Streamlit's HTML component to render the custom container
-    components.html(rounded_corner_container, height=600)
+    components.html(rounded_corner_container, height=600 ,width=800)
 
     # Title for the second plot selection
     st.subheader('Total production of each well [oil, water]')
@@ -433,13 +434,13 @@ elif selected_page == "Part 2":
     fig.update_layout(
         plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
         paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
-        margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame,
-        font=dict(family="Arial", size=12, color="black"),
+        margin=dict(l=90, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame,
+        font=dict(family="Arial", size=12, color="white"),
         xaxis_title="Total Production",
         yaxis_title="Well Name",
         coloraxis_colorbar=dict(title='Total Production'),  # Add a color bar title
         legend=dict(title='Production Type', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
-        title=dict(font=dict(size=16, color='black')),
+        title=dict(font=dict(size=16, color='white')),
         hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
         hovermode="closest"
     )
@@ -455,7 +456,7 @@ elif selected_page == "Part 2":
     """
 
     # Use Streamlit's HTML component to render the custom container
-    components.html(rounded_corner_container, height=600)
+    components.html(rounded_corner_container, height=600 ,width=800)
     # Calculate GOR and create a new dataframe
     df['GOR'] = df['BORE_GAS_VOL'] / df['BORE_OIL_VOL']
     df7 = df[['DATEPRD', 'NPD_WELL_BORE_NAME', 'GOR']]
@@ -534,11 +535,11 @@ elif selected_page == "part 3":
             plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
             paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
             margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
-            font=dict(family="Arial", size=12, color="black"),
+            font=dict(family="Arial", size=12, color="white"),
             xaxis=dict(linecolor='black', linewidth=2, mirror=True),
             yaxis=dict(linecolor='black', linewidth=2, mirror=True),
             legend=dict(title='Model', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
-            title=dict(font=dict(size=16, color='black')),
+            title=dict(font=dict(size=16, color='white')),
             hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
             hovermode="closest"
         )
@@ -551,7 +552,7 @@ elif selected_page == "part 3":
         """
 
         # Use Streamlit's HTML component to render the custom container
-        components.html(rounded_corner_container, height=600)
+        components.html(rounded_corner_container, height=600 ,width=800)
         
 
     # Streamlit page configuration
@@ -598,16 +599,21 @@ elif selected_page == "part 3":
         fig = px.scatter(df_part3_filtered, x='DATEPRD', y='oil_smoothed',
                         labels={'DATEPRD': 'Date', 'oil_smoothed': 'Smoothed Oil Production'},
                         title="Smoothed Oil Production of 15/9-F-14 within Selected Date Range")
+        # Update traces to customize the marker color and appearance
+        fig.update_traces(
+            marker=dict(color='blue'),  # Customize marker properties
+            selector=dict(mode='markers')  # Apply updates to the scatter markers
+        )
         # Apply custom styles for a glassy appearance and rounded edges
         fig.update_layout(
             plot_bgcolor='rgba(255, 255, 255, .9)',  # Glassy white background
             paper_bgcolor='rgba(0, 71, 171, .5)',  # Semi-transparent white background
             margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
-            font=dict(family="Arial", size=12, color="black"),
+            font=dict(family="Arial", size=12, color="white"),
             xaxis=dict(linecolor='black', linewidth=2, mirror=True),
             yaxis=dict(linecolor='black', linewidth=2, mirror=True),
             legend=dict(title='Model', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
-            title=dict(font=dict(size=16, color='black')),
+            title=dict(font=dict(size=16, color='white')),
             hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
             hovermode="closest"
         )
@@ -618,7 +624,7 @@ elif selected_page == "part 3":
         </div>
         """
         # Use Streamlit's HTML component to render the custom container
-        components.html(rounded_corner_container, height=600)
+        components.html(rounded_corner_container, height=600 ,width=800)
         # Show Effect of Smoothing
         st.subheader("Show Effect of Smoothing")
 
@@ -626,18 +632,31 @@ elif selected_page == "part 3":
         fig = px.line(df_part3_filtered, x="DATEPRD", y=["BORE_OIL_VOL", "oil_smoothed"],
                     labels={'DATEPRD': 'Date', 'BORE_OIL_VOL': 'Original Oil Production', 'oil_smoothed': 'Smoothed Oil Production'},
                     title="Oil Production and Smoothing Effect of 15/9-F-14")
-        fig.update_traces(mode='lines+markers')
+                # Update traces to customize the line colors and appearance
+        fig.update_traces(
+            mode='lines+markers',
+            line=dict(color='blue', width=2),  # Set the color for the original oil production line
+            selector=dict(name='BORE_OIL_VOL')  # Select the trace by name
+        )
+        fig.update_traces(
+                    mode='lines+markers',
+                    line=dict(color='green', width=2),  # Set the color for the original oil production line
+                    selector=dict(name='oil_smoothed')  # Select the trace by name
+                )
+        
+
+
 
         # Apply custom styles for a glassy appearance and rounded edges
         fig.update_layout(
             plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
             paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
             margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
-            font=dict(family="Arial", size=12, color="black"),
+            font=dict(family="Arial", size=12, color="white"),
             xaxis=dict(linecolor='black', linewidth=2, mirror=True),
             yaxis=dict(linecolor='black', linewidth=2, mirror=True),
             legend=dict(title='Model', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
-            title=dict(font=dict(size=16, color='black')),
+            title=dict(font=dict(size=16, color='white')),
             hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
             hovermode="closest"
         )
@@ -650,7 +669,7 @@ elif selected_page == "part 3":
         """
 
         # Use Streamlit's HTML component to render the custom container
-        components.html(rounded_corner_container, height=600)
+        components.html(rounded_corner_container, height=600,width=800)
 
         # Curve-Fitting
         st.subheader("Curve-Fitting")
@@ -684,4 +703,47 @@ elif selected_page == "part 3":
 
         # Display the interactive plot based on the selected model
         plot_model(T, Q, Q_exp, Q_harm, Q_hyp, model_selected)
-        
+
+# Check the selected page from the radio buttons
+elif selected_page == "About the Project":
+    # Use markdown with unsafe_allow_html to allow HTML and CSS
+    st.markdown("""
+        <style>
+        .main * {
+            color: white;
+        }
+        </style>
+        <h2>About This Project</h2>
+        <p>
+        This project is showcased at the SPE Science Fair and focuses on the analysis of production data from the Volve field. 
+        The goal is to provide interactive visualizations and insights that can help understand the field's performance.
+        </p>
+        <h2>Data Overview</h2>
+        <p>
+        The dataset contains daily and monthly production data for seven (07) wellbores from the Volve field in Norway. 
+        Available information includes the wellbore name, the operating time, the hydrocarbon (oil & gas) production, and the fluid injection.
+        </p>
+        <p>
+        This comprehensive dataset is a valuable resource for analysis and can be found on Kaggle.
+        </div>
+        """, unsafe_allow_html=True)
+        # Acknowledgment for Eng. Ahmed Abd Elgawad with LinkedIn and YouTube channel information
+    st.markdown("""
+        <h2 style='color: white; text-align: center;'>Acknowledgments</h2>
+        <p style='color: white; text-align: center;'>
+        I would like to express my deepest appreciation to Eng. Ahmed Abd Elgawad for his invaluable guidance and support throughout this project.
+        </p>
+        <p style='color: white; text-align: center;'>
+        For more professional insights, you can connect with Eng. Abd Elgawad on 
+        <a href='https://www.linkedin.com/in/ahmed-abd-elgawad-9a6889212/' style='color: white;'>LinkedIn</a> 
+        and explore his analytical work on his 
+        <a href='https://www.youtube.com/@AhmedAbdElgawad-petroAnalyst' style='color: white;'>YouTube channel</a>.
+        </p>
+        <div style='text-align: center;'>
+            <img src='https://github.com/Youssef1Rezk/Production-Data-Analysis/blob/c66eff7657ed8cd1d513321001c378cf809769aa/photo_2024-05-10_08-56-10.jpg' 
+            style='border-radius: 50%; width: 300px; height: 300px;'>
+        </div>
+        """, unsafe_allow_html=True)
+
+
+    st.markdown("https://www.kaggle.com/datasets/lamyalbert/volve-production-data")
