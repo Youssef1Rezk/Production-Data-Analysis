@@ -170,11 +170,11 @@ def plot_production_profile(well_bore_code, df):
         plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
         paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
         margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
-        font=dict(family="Arial", size=12, color="black"),
+        font=dict(family="Arial", size=12, color="white"),
         xaxis=dict(linecolor='black', linewidth=2, mirror=True),
         yaxis=dict(linecolor='black', linewidth=2, mirror=True),
         legend=dict(title='Production Type', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
-        title=dict(font=dict(size=16, color='black')),
+        title=dict(font=dict(size=16, color='white')),
         hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
         hovermode="closest"
     )
@@ -223,11 +223,11 @@ def plot_total_production_by_year_with_slider(df):
         plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
         paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
         margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
-        font=dict(family="Arial", size=12, color="black"),
+        font=dict(family="Arial", size=12, color="white"),
         xaxis=dict(linecolor='black', linewidth=2, mirror=True),
         yaxis=dict(linecolor='black', linewidth=2, mirror=True),
         legend=dict(title='Production Type', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
-        title=dict(font=dict(size=16, color='black')),
+        title=dict(font=dict(size=16, color='white')),
         hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
         hovermode="closest"
     )
@@ -274,11 +274,11 @@ def plot_total_production_by_year_with_slider2(df):
         plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
         paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
         margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame,
-        font=dict(family="Arial", size=12, color="black"),
+        font=dict(family="Arial", size=12, color="white"),
         xaxis=dict(linecolor='black', linewidth=2, mirror=True),
         yaxis=dict(linecolor='black', linewidth=2, mirror=True),
         legend=dict(title='Production Type', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
-        title=dict(font=dict(size=16, color='black')),
+        title=dict(font=dict(size=16, color='white')),
         hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
         hovermode="closest"
     )
