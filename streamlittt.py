@@ -286,23 +286,6 @@ def get_base64_of_bin_file(bin_file):
         data = file.read()
     return base64.b64encode(data).decode()
 
-# Function to set the background image
-def set_background(png_file):
-    bin_str = get_base64_of_bin_file(png_file)
-    background_style = f"""
-    <style>
-    .stApp {{
-        background-image: url("data:image/png;base64,{bin_str}");
-        background-size: cover;
-    }}
-    </style>
-    """
-    st.markdown(background_style, unsafe_allow_html=True)
-
-# Set a background image
-set_background(r'D:\science fair\images\pexels-danbuilds-633409.jpg')
-# Create a sidebar radio button for navigation
-selected_page = st.sidebar.radio(
     "Navigation",
     ["Show Data", "Part 1", "Part 2","part 3"]
 )
