@@ -4,12 +4,17 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import seaborn as sns 
 import streamlit as st
+import plotly.express as px
+import plotly.graph_objs as go
+import base64
+import requests
 import matplotlib.animation as animation
 from datetime import datetime
 from scipy.optimize import curve_fit
 from PIL import Image
 import requests
 from io import BytesIO
+import streamlit.components.v1 as components
 
 
 # Load the data
@@ -73,17 +78,23 @@ def plot_gor(well_bore_name, df7):
                         (well_data['DATEPRD'] <= pd.to_datetime(end_date))]
 
     # Plotting code
+    sns.set_theme(style="whitegrid")
     fig, ax = plt.subplots(figsize=(15, 4))
-    sns.lineplot(x="DATEPRD", y="GOR", data=df_well, hue="NPD_WELL_BORE_NAME", palette="Dark2", linewidth=1)
-    plt.title(f"GOR for {well_bore_name} from {start_date} to {end_date}")
-    plt.xlabel("Date")
-    plt.ylabel("GOR (m³/m³)")
-    plt.legend(title='Well Name')
+    sns.lineplot(x="DATEPRD", y="GOR", data=df_well, hue="NPD_WELL_BORE_NAME", palette="muted", linewidth=2.5)
+
+    # Customize the plot for a better look
+    plt.title(f"GOR for {well_bore_name} from {start_date} to {end_date}", fontsize=16)
+    plt.xlabel("Date", fontsize=14)
+    plt.ylabel("GOR (m³/m³)", fontsize=14)
+    plt.legend(title='Well Name', fontsize=12)
+    sns.despine(fig)  # Remove the top and right spines from plot
+
+    # Show the interactive plot in Streamlit
     st.pyplot(fig)
+
 
 # Define the plotting function with time range slider
 def plot_production_profile(well_bore_code, df):
-
     # Get the date range for the selected well
     well_data = filtered_df[filtered_df['WELL_BORE_CODE'] == well_bore_code]
     min_date = well_data['DATEPRD'].min()
@@ -109,19 +120,47 @@ def plot_production_profile(well_bore_code, df):
 
     # Filter the data based on the selected date range
     filtered_data = well_data[(well_data['DATEPRD'] >= start_date) & (well_data['DATEPRD'] <= end_date)]
+    # Define colors for each type of production volume
+    colors = {'BORE_OIL_VOL': 'orange', 'BORE_WAT_VOL': 'blue'}
+    # Plotting the production profile with Plotly
+    fig = px.line(filtered_data, x='DATEPRD', y=['BORE_OIL_VOL', 'BORE_WAT_VOL'],
+                  labels={'DATEPRD': 'Date', 'value': 'Volume', 'variable': 'Type'},
+                  title=f"Production Profile for Well: {well_bore_code}",color_discrete_map=colors)
+    
+    # Update traces to customize the appearance
+    fig.update_traces(line=dict(width=2))
+    fig.for_each_trace(lambda t: t.update(name=t.name.replace("BORE_OIL_VOL=", "Oil Volume")))
+    fig.for_each_trace(lambda t: t.update(name=t.name.replace("BORE_WAT_VOL=", "Water Volume")))
+    
+    fig.update_layout(
+        plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
+        paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
+        margin=dict(l=20, r=20, t=40, b=20),
+        font=dict(family="Arial", size=12, color="black"),
+        xaxis=dict(linecolor='black', linewidth=2, mirror=True),
+        yaxis=dict(linecolor='black', linewidth=2, mirror=True),
+        legend=dict(title='Production Type', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
+        title=dict(font=dict(size=16, color='black')),
+        hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
+        hovermode="closest",
+        autosize=True,  # Make the figure responsive
+    )
 
-    # Plotting the production profile
-    plt.figure(figsize=(8, 4))
-    plt.plot(filtered_data['DATEPRD'], filtered_data['BORE_OIL_VOL'], label='oil', color='#FFBF00')
-    plt.plot(filtered_data['DATEPRD'], filtered_data['BORE_WAT_VOL'], label='water', color='#6495ED')
-    plt.xlabel("Time")
-    plt.ylabel("Production")
-    plt.title(f"Production Profile for Well: {well_bore_code}")
-    plt.legend()
-    plt.grid(which='major', linestyle='-', alpha=.5, color="#6666")
-    plt.minorticks_on()
-    plt.grid(which='minor', linestyle='--', alpha=.2, color="#9999")
-    st.pyplot(plt.gcf())  # Display the plot in Streamlit
+    # Convert the Plotly figure to HTML and store it in a variable
+    fig_html = fig.to_html()
+
+    # Custom HTML and CSS to create a container with rounded corners
+    rounded_corner_container = f"""
+    <div style='border-radius: 15px; overflow: hidden;'>
+        {fig_html}
+    </div>
+    """
+
+    # Use Streamlit's HTML component to render the custom container
+    components.html(rounded_corner_container, height=600)
+    
+
+
 # Define a function to plot total production by year with a date range slider
 def plot_total_production_by_year_with_slider(df):
     # Create a date range selection bar
@@ -138,53 +177,40 @@ def plot_total_production_by_year_with_slider(df):
     filtered_df_yearly = df[(df['DATEPRD'] >= pd.to_datetime(start_date_yearly)) & 
                         (df['DATEPRD'] <= pd.to_datetime(end_date_yearly))]
 
-    # Group by year and sum the oil and water production
-    production_by_year = filtered_df_yearly.groupby(filtered_df_yearly["DATEPRD"].dt.year)[["BORE_OIL_VOL", "BORE_WAT_VOL"]].sum()
-
-    # Plot the total production for each year
-    fig, ax = plt.subplots(figsize=(10, 6))
-    production_by_year.plot(kind="line", ax=ax)
-    plt.title("Total Production of Oil and Water Each Year")
-    plt.xlabel("Year")
-    plt.ylabel("Production")
-    plt.grid(which="major", linestyle="-", alpha=.5, color="#6666")
-    plt.minorticks_on()
-    plt.grid(which="minor", linestyle="--", alpha=.2, color="#9999")
-
-    # Show the plot directly
-    st.pyplot(fig)
-
-# Define a function to plot total production by year with a date range slider
-def plot_total_production_by_year_with_slider2(df):
-    # Create a date range selection bar
-    start_date_yearly, end_date_yearly = st.slider(
-        'Select the date range',
-        min_value=df['DATEPRD'].min().to_pydatetime().date(),
-        max_value=df['DATEPRD'].max().to_pydatetime().date(),
-        value=(df['DATEPRD'].min().to_pydatetime().date(), df['DATEPRD'].max().to_pydatetime().date()),
-        format="YYYY-MM-DD",
-        key='date_range_slider_total_production_2'  # Unique key for the slider
+   # Group by year and sum the oil and water production
+    production_by_year = filtered_df_yearly.groupby(filtered_df_yearly["DATEPRD"].dt.year)[["BORE_OIL_VOL", "BORE_WAT_VOL"]].sum().reset_index()
+    # Define colors for each type of production volume
+    colors = {'BORE_OIL_VOL': 'orange', 'BORE_WAT_VOL': 'blue'}
+    # Plot the total production for each year using Plotly
+    fig = px.line(production_by_year, x='DATEPRD', y=['BORE_OIL_VOL', 'BORE_WAT_VOL'],
+                  labels={'DATEPRD': 'Year', 'value': 'Production Volume', 'variable': 'Type'},
+                  title="Total Production of Oil and Water Each Year",color_discrete_map=colors)
+    
+    fig.update_layout(
+        plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
+        paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
+        margin=dict(l=20, r=20, t=40, b=20),
+        font=dict(family="Arial", size=12, color="black"),
+        xaxis=dict(linecolor='black', linewidth=2, mirror=True),
+        yaxis=dict(linecolor='black', linewidth=2, mirror=True),
+        legend=dict(title='Production Type', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
+        title=dict(font=dict(size=16, color='black')),
+        hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
+        hovermode="closest"
     )
 
-    # Filter the dataframe based on the selected date range
-    filtered_df_yearly = df[(df['DATEPRD'] >= pd.to_datetime(start_date_yearly)) & 
-                        (df['DATEPRD'] <= pd.to_datetime(end_date_yearly))]
+    # Convert the Plotly figure to HTML and store it in a variable
+    fig_html = fig.to_html()
 
-    # Group by year and sum the oil and water production
-    production_by_year = filtered_df_yearly.groupby(filtered_df_yearly["DATEPRD"].dt.year)[["BORE_OIL_VOL", "BORE_WAT_VOL","BORE_GAS_VOL"]].sum()
+    # Custom HTML and CSS to create a container with rounded corners
+    rounded_corner_container = f"""
+    <div style='border-radius: 15px; overflow: hidden;'>
+        {fig_html}
+    </div>
+    """
 
-    # Plot the total production for each year
-    fig, ax = plt.subplots(figsize=(10, 6))
-    production_by_year.plot(kind="line", ax=ax)
-    plt.title("Total Production of Oil, Water, and Gas Each Year")
-    plt.xlabel("Year")
-    plt.ylabel("Production")
-    plt.grid(which="major", linestyle="-", alpha=.5, color="#6666")
-    plt.minorticks_on()
-    plt.grid(which="minor", linestyle="--", alpha=.2, color="#9999")
-
-    # Show the plot directly
-    st.pyplot(fig)
+    # Use Streamlit's HTML component to render the custom container
+    components.html(rounded_corner_container, height=600)
 
 # Define a function to plot total production by year with a date range slider
 def plot_total_production_by_year_with_slider2(df):
@@ -201,21 +227,47 @@ def plot_total_production_by_year_with_slider2(df):
     filtered_df_yearly = df[(df['DATEPRD'] >= pd.to_datetime(start_date_yearly)) & 
                         (df['DATEPRD'] <= pd.to_datetime(end_date_yearly))]
 
-    # Group by year and sum the oil and water production
-    production_by_year = filtered_df_yearly.groupby(filtered_df_yearly["DATEPRD"].dt.year)[["BORE_OIL_VOL", "BORE_WAT_VOL","BORE_GAS_VOL"]].sum()
+    # Group by year and sum the oil, water, and gas production
+    production_by_year = filtered_df_yearly.groupby(filtered_df_yearly["DATEPRD"].dt.year)[["BORE_OIL_VOL", "BORE_WAT_VOL", "BORE_GAS_VOL"]].sum().reset_index()
+    # Define colors for each type of production volume
+    colors = {'BORE_OIL_VOL': 'orange', 'BORE_WAT_VOL': 'blue','BORE_GAS_VOL' :'red'}
+    # Plot the total production for each year using Plotly
+    fig = px.line(production_by_year, x='DATEPRD', y=['BORE_OIL_VOL', 'BORE_WAT_VOL', 'BORE_GAS_VOL'],
+                  labels={'DATEPRD': 'Year', 'value': 'Production Volume', 'variable': 'Type'},
+                  title="Total Production of Oil, Water, and Gas Each Year",color_discrete_map=colors)
+    
+    # Update layout for a glassy look and rounded edges
+    fig.update_layout(
+        plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
+        paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
+        margin=dict(l=20, r=20, t=40, b=20),
+        font=dict(family="Arial", size=12, color="black"),
+        xaxis=dict(linecolor='black', linewidth=2, mirror=True),
+        yaxis=dict(linecolor='black', linewidth=2, mirror=True),
+        legend=dict(title='Production Type', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
+        title=dict(font=dict(size=16, color='black')),
+        hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
+        hovermode="closest"
+    )
 
-    # Plot the total production for each year
-    fig, ax = plt.subplots(figsize=(10, 6))
-    production_by_year.plot(kind="line", ax=ax)
-    plt.title("Total Production of Oil and Water Each Year")
-    plt.xlabel("Year")
-    plt.ylabel("Production")
-    plt.grid(which="major", linestyle="-", alpha=.5, color="#6666")
-    plt.minorticks_on()
-    plt.grid(which="minor", linestyle="--", alpha=.2, color="#9999")
+    # Convert the Plotly figure to HTML and store it in a variable
+    fig_html = fig.to_html()
 
-    # Show the plot directly
-    st.pyplot(fig)
+    # Custom HTML and CSS to create a container with rounded corners
+    rounded_corner_container = f"""
+    <div style='border-radius: 15px; overflow: hidden;'>
+        {fig_html}
+    </div>
+    """
+
+    # Use Streamlit's HTML component to render the custom container
+    components.html(rounded_corner_container, height=600)
+
+# Function to get base64 of the binary file
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as file:
+        data = file.read()
+    return base64.b64encode(data).decode()
 
 
 # Create a sidebar radio button for navigation
@@ -259,18 +311,18 @@ elif selected_page == "Part 1":
 elif selected_page == "Part 2":
     # Set a flag in session state to indicate the button has been pressed
     st.session_state['part2_active'] = True
-# Reset part2_active flag if Part 2 is not selected
-if selected_page != "Part 2":
-    # Reset part2_active flag
-    st.session_state['part2_active'] = False
+    # Reset part2_active flag if Part 2 is not selected
+    if selected_page != "Part 2":
+        # Reset part2_active flag
+        st.session_state['part2_active'] = False
 
 
-# Use the flag to keep the dropdown and plot active even after reruns
-if 'part2_active' in st.session_state and st.session_state['part2_active']:
-    # Title for the plot selection
-    st.subheader('The contribution of each well in oil, gas, water production.')
-        
-    # Group by well name and calculate the sum
+    # Use the flag to keep the dropdown and plot active even after reruns
+    if 'part2_active' in st.session_state and st.session_state['part2_active']:
+        # Title for the plot selection
+        st.subheader('The contribution of each well in oil, gas, water production.')
+            
+        # Group by well name and calculate the sum
     d = df.groupby("NPD_WELL_BORE_NAME")[["BORE_OIL_VOL", "BORE_WAT_VOL", "BORE_GAS_VOL"]].sum().drop(index="15/9-F-4")
 
     # Convert to percentage
@@ -303,29 +355,46 @@ if 'part2_active' in st.session_state and st.session_state['part2_active']:
     # Convert to percentage
     d_pct = (d / d.sum()) * 100
 
-    # Create the bar plot with a larger figure size
-    fig, ax = plt.subplots(figsize=(20, 8))
-    d_pct.plot(kind='bar', color=colors_list[:len(d)], edgecolor=None, ax=ax)
-    plt.title(f"Contribution of each well in {selected_volume_type}", fontsize=16)
+    # Create the bar plot using Plotly
+    fig = px.bar(
+        d_pct.reset_index(),
+        x='NPD_WELL_BORE_NAME',
+        y=selected_volume_type,
+        text=d_pct.apply(lambda x: f'{x:.2f}%'),
+        title=f"Contribution of each well in {selected_volume_type}",
+        color=selected_volume_type,
+        color_continuous_scale=['blue', 'red']  # Gradient from orange to blue
+    )
 
-    # Customize the ticks and spines
-    plt.xticks(fontsize=16, rotation=45)
-    for spine in plt.gca().spines.values():
-        spine.set_visible(False)
-    plt.yticks([])
+    # Customize the layout
+    fig.update_traces(textposition='outside')
+    fig.update_layout(
+    plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
+    paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
+    margin=dict(l=20, r=20, t=40, b=20),
+    font=dict(family="Arial", size=12, color="black"),
+    xaxis_title="Well Name",
+    yaxis_title="Percentage Contribution",
+    yaxis=dict(tickformat=".2f"),
+    coloraxis_colorbar=dict(title='Percentage Contribution'),  # Add a color bar title
+    legend=dict(title='Production Type', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
+    title=dict(font=dict(size=16, color='black')),
+    hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
+    hovermode="closest"
+ )
 
-    # Annotate the bars with the percentage values
-    for p, color in zip(ax.patches, colors_list):
-        width = p.get_width()
-        height = p.get_height()
-        x, y = p.get_xy() 
-        ax.annotate(f'{height:.2f}%', (x + width/2, y + height*1.02), ha='center', color=color, fontsize=17)
+    # Convert the Plotly figure to HTML and store it in a variable
+    fig_html = fig.to_html()
 
-    # Adjust the legend position
-    plt.legend([p for p in ax.patches], [well for well in d.index], loc='upper center', bbox_to_anchor=(0.5, -0.3), fancybox=True, shadow=True, ncol=len(d.index), fontsize=14)
+    # Custom HTML and CSS to create a container with rounded corners
+    rounded_corner_container = f"""
+    <div style='border-radius: 15px; overflow: hidden;'>
+        {fig_html}
+    </div>
+    """
 
-    # Show the plot in Streamlit
-    st.pyplot(fig)
+    # Use Streamlit's HTML component to render the custom container
+    components.html(rounded_corner_container, height=600)
 
     # Title for the second plot selection
     st.subheader('Total production of each well [oil, water]')
@@ -335,28 +404,42 @@ if 'part2_active' in st.session_state and st.session_state['part2_active']:
     df5['total production'] = df5['BORE_OIL_VOL'] + df5['BORE_WAT_VOL']
 
     # Drop the individual oil and water volume columns to keep only the total production
-    df6 = df5.drop(columns=['BORE_OIL_VOL', 'BORE_WAT_VOL'])
+    df6 = df5.drop(columns=['BORE_OIL_VOL', 'BORE_WAT_VOL']).reset_index()
 
-    # Create the horizontal bar plot for total production
-    fig, ax = plt.subplots(figsize=(10, 8))
-    df6['total production'].plot(kind='barh', color='#6495ED', edgecolor=None, ax=ax)
-    plt.title('Total Production of Each Well [Oil, Water]', fontsize=16)
+    # Create the horizontal bar plot for total production using Plotly
+    fig = px.bar(df6, y='NPD_WELL_BORE_NAME', x='total production', orientation='h',
+                title='Total Production of Each Well [Oil, Water]',
+                labels={'NPD_WELL_BORE_NAME': 'Well Name', 'total production': 'Total Production'},
+                color='total production',
+                color_continuous_scale=['blue', 'red'])  # Gradient from orange to blue
 
-    # Customize the ticks and spines
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
-    for spine in plt.gca().spines.values():
-        spine.set_visible(False)
+    # Customize the layout for a glassy look and rounded edges
+    fig.update_layout(
+        plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
+        paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
+        margin=dict(l=20, r=20, t=40, b=20),
+        font=dict(family="Arial", size=12, color="black"),
+        xaxis_title="Total Production",
+        yaxis_title="Well Name",
+        coloraxis_colorbar=dict(title='Total Production'),  # Add a color bar title
+        legend=dict(title='Production Type', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
+        title=dict(font=dict(size=16, color='black')),
+        hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
+        hovermode="closest"
+    )
 
-    # Annotate the bars with the total production values
-    for p in ax.patches:
-        width = p.get_width()
-        height = p.get_height()
-        x, y = p.get_xy() 
+    # Convert the Plotly figure to HTML and store it in a variable
+    fig_html = fig.to_html()
 
-    # Show the plot in Streamlit
-    st.pyplot(fig)
+    # Custom HTML and CSS to create a container with rounded corners
+    rounded_corner_container = f"""
+    <div style='border-radius: 15px; overflow: hidden;'>
+        {fig_html}
+    </div>
+    """
 
+    # Use Streamlit's HTML component to render the custom container
+    components.html(rounded_corner_container, height=600)
     # Calculate GOR and create a new dataframe
     df['GOR'] = df['BORE_GAS_VOL'] / df['BORE_OIL_VOL']
     df7 = df[['DATEPRD', 'NPD_WELL_BORE_NAME', 'GOR']]
@@ -384,13 +467,7 @@ if 'part2_active' in st.session_state and st.session_state['part2_active']:
     plot_total_production_by_year_with_slider2(df)
 # Part 3 page
 elif selected_page == "part 3":
-    st.subheader("Oil Production of 15/9-F-14")
-    
-    # Filter the DataFrame for the specific well and remove zero oil production entries
-    df_part3 = df[df["NPD_WELL_BORE_NAME"] == '15/9-F-14']
-    df_part3 = df_part3[df_part3["BORE_OIL_VOL"] != 0]
-    
-    # Define the outlier_treatment function
+        # Define the outlier_treatment function
     def outlier_treatment(datacolumn):
         sorted(datacolumn)
         Q1, Q3 = np.percentile(datacolumn, [25, 75])
@@ -398,93 +475,6 @@ elif selected_page == "part 3":
         lower_range = Q1 - (1.5 * IQR)
         upper_range = Q3 + (1.5 * IQR)
         return lower_range, upper_range
-
-    # Apply outlier treatment to oil volume data
-    lowerbound, upperbound = outlier_treatment(df_part3["BORE_OIL_VOL"])
-    df_part3.drop(df_part3[(df_part3["BORE_OIL_VOL"] > upperbound) | (df_part3["BORE_OIL_VOL"] < lowerbound)].index, inplace=True)
-
-    # Slider for smoothing window
-    smoothing_window = st.slider('Select smoothing window size', min_value=1, max_value=100, value=70, step=1)
-    
-    # Apply rolling mean with the selected window size
-    df_part3['oil_smoothed'] = df_part3["BORE_OIL_VOL"].rolling(window=smoothing_window, center=True).mean()
-
-    # Get the date range for the selected well
-    min_date = df_part3['DATEPRD'].min()
-    max_date = df_part3['DATEPRD'].max()
-
-    # Convert min_date and max_date to datetime.date objects
-    min_date = min_date.to_pydatetime().date()
-    max_date = max_date.to_pydatetime().date()
-
-    # Create a time range slider
-    start_date, end_date = st.slider(
-        'Select the date range',
-        min_value=min_date,
-        max_value=max_date,
-        value=(min_date, max_date),
-        format="YYYY-MM-DD"
-    )
-
-    # Filter the dataframe based on the selected date range
-    df_part3_filtered = df_part3[(df_part3['DATEPRD'] >= pd.to_datetime(start_date)) & 
-                                  (df_part3['DATEPRD'] <= pd.to_datetime(end_date))]
-
-    # Create scatter plot for oil production
-    fig, ax = plt.subplots(figsize=(18, 10))
-    ax.scatter(df_part3_filtered['DATEPRD'], df_part3_filtered['oil_smoothed'])
-    plt.xlabel("Date")
-    plt.ylabel("Smoothed Oil Production")
-    plt.title("Smoothed Oil Production of 15/9-F-14 within Selected Date Range")
-    st.pyplot(fig)
-     # Second title for the effect of smoothing
-    st.subheader("Show Effect of Smoothing")
-
-    # Create a time range slider for the period of the smoothing effect
-    start_date, end_date = st.slider(
-        'Select the period for smoothing effect',
-        min_value=min_date,
-        max_value=max_date,
-        value=(min_date, max_date),
-        format="YYYY-MM-DD"
-    )
-
-    # Filter the dataframe based on the selected period
-    df_period = df_part3[(df_part3['DATEPRD'] >= pd.to_datetime(start_date)) & 
-                         (df_part3['DATEPRD'] <= pd.to_datetime(end_date))]
-
-    # Plotting the data
-    plt.figure(figsize=(18, 10))
-    plt.plot(df_period["DATEPRD"], df_period["BORE_OIL_VOL"], label="Original", color="orange")
-    plt.plot(df_period["DATEPRD"], df_period["oil_smoothed"], label="Smoothed", color="blue")
-    plt.legend()
-    plt.grid(which="major", color="#6666", linestyle="-", alpha=0.5)
-    plt.grid(which="minor", color="#9999", linestyle="-", alpha=0.1)
-    plt.minorticks_on()
-    plt.xlabel("Date")
-    plt.ylabel("Oil Production")
-    plt.title("Oil Production and Smoothing Effect of 15/9-F-14")
-    st.pyplot(plt.gcf())
-    # Third title for curve-fitting
-    st.subheader("Curve-Fitting")
-
-            # Filter the DataFrame for the specific well '15/9-F-14' and remove zero oil production entries
-    df_filtered = df[(df["NPD_WELL_BORE_NAME"] == '15/9-F-14') & (df["BORE_OIL_VOL"] != 0)]
-
-    # Calculate the days from the date for the specific well
-    df_filtered["days"] = (df_filtered["DATEPRD"] - df_filtered["DATEPRD"].min()).dt.days
-
-    # Apply rolling mean with a window size of 70 to smooth the oil volume data
-    df_filtered['oil_smoothed'] = df_filtered["BORE_OIL_VOL"].rolling(window=70, center=True).mean()
-    df_filtered = df_filtered[["oil_smoothed", "days"]].dropna()
-
-    # Get T and Q for fitting
-    T = df_filtered["days"]
-    Q = df_filtered["oil_smoothed"]
-
-    # Normalize the time and rate data
-    T_normalized = T / max(T)
-    Q_normalized = Q / max(Q)
 
     # Exponential model function
     def exponential(t, qi, di):
@@ -509,37 +499,173 @@ elif selected_page == "part 3":
         b = params[2] if len(params) > 2 else 0
         return qi, di, b
 
-    # Fit models
-    qi_exp, di_exp, _ = fit_model(exponential, T, Q)
-    qi_harm, di_harm, _ = fit_model(harmonic, T, Q)
-    qi_hyp, di_hyp, b_hyp = fit_model(hyperbolic, T, Q, p0=[1, 1, 1])
-
-    # Generate model curves
-    Q_exp = exponential(T, qi_exp, di_exp)
-    Q_harm = harmonic(T, qi_harm, di_harm)
-    Q_hyp = hyperbolic(T, qi_hyp, di_hyp, b_hyp)
-
-    # Plotting function
-    def plot_model(model):
-        plt.figure(figsize=(10, 6))
-        plt.plot(T, Q, label='Smoothed', color="green")
+    # Plotting function with Plotly for curve fitting models
+    def plot_model(T, Q, Q_exp, Q_harm, Q_hyp, model):
+        fig = px.line()
+        fig.add_scatter(x=T, y=Q, mode='lines', name='Smoothed', line=dict(color='green'))
         if model == 'exponential' or model == 'all':
-            plt.plot(T, Q_exp, label='Exponential', color="blue")
+            fig.add_scatter(x=T, y=Q_exp, mode='lines', name='Exponential', line=dict(color='blue'))
         if model == 'harmonic' or model == 'all':
-            plt.plot(T, Q_harm, label='Harmonic', color="red")
+            fig.add_scatter(x=T, y=Q_harm, mode='lines', name='Harmonic', line=dict(color='red'))
         if model == 'hyperbolic' or model == 'all':
-            plt.plot(T, Q_hyp, label='Hyperbolic', color="yellow")
-        plt.legend()
-        plt.grid(which="major", color="#6666", linestyle='-', alpha=.5)
-        plt.grid(which="minor", color="#9999", linestyle='-', alpha=.1)
-        plt.minorticks_on()
-        plt.xlabel("Days")
-        plt.ylabel("Oil Production (Smoothed)")
-        plt.title("Curve Fitting Models for Oil Production of Well 15/9-F-14")
-        st.pyplot(plt.gcf())
+            fig.add_scatter(x=T, y=Q_hyp, mode='lines', name='Hyperbolic', line=dict(color='yellow'))
+        fig.update_layout(title="Curve Fitting Models for Oil Production of Well 15/9-F-14",
+                        xaxis_title='Days',
+                        yaxis_title='Oil Production (Smoothed)',
+                        legend_title='Model')
+                # Apply custom styles for a glassy appearance and rounded edges
+        fig.update_layout(
+            plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
+            paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
+            margin=dict(l=20, r=20, t=40, b=20),
+            font=dict(family="Arial", size=12, color="black"),
+            xaxis=dict(linecolor='black', linewidth=2, mirror=True),
+            yaxis=dict(linecolor='black', linewidth=2, mirror=True),
+            legend=dict(title='Model', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
+            title=dict(font=dict(size=16, color='black')),
+            hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
+            hovermode="closest"
+        )
 
-    # Dropdown for model selection in Streamlit
-    model_selected = st.selectbox('Select a model:', ['exponential', 'harmonic', 'hyperbolic', 'all'])
+        # Custom HTML and CSS to create a container with rounded corners
+        rounded_corner_container = f"""
+        <div style='border-radius: 15px; overflow: hidden;'>
+            {fig.to_html()}
+        </div>
+        """
 
-    # Display the interactive plot based on the selected model
-    plot_model(model_selected)
+        # Use Streamlit's HTML component to render the custom container
+        components.html(rounded_corner_container, height=600)
+        
+
+    # Streamlit page configuration
+
+    if selected_page == "part 3":
+        st.subheader("Oil Production of 15/9-F-14")
+        
+        # Filter the DataFrame for the specific well and remove zero oil production entries
+        df_part3 = df[df["NPD_WELL_BORE_NAME"] == '15/9-F-14']
+        df_part3 = df_part3[df_part3["BORE_OIL_VOL"] != 0]
+        
+        # Apply outlier treatment to oil volume data
+        lowerbound, upperbound = outlier_treatment(df_part3["BORE_OIL_VOL"])
+        df_part3.drop(df_part3[(df_part3["BORE_OIL_VOL"] > upperbound) | (df_part3["BORE_OIL_VOL"] < lowerbound)].index, inplace=True)
+
+        # Slider for smoothing window
+        smoothing_window = st.slider('Select smoothing window size', min_value=1, max_value=100, value=70, step=1)
+        
+        # Apply rolling mean with the selected window size
+        df_part3['oil_smoothed'] = df_part3["BORE_OIL_VOL"].rolling(window=smoothing_window, center=True).mean()
+
+        # Get the date range for the selected well
+        min_date = df_part3['DATEPRD'].min()
+        max_date = df_part3['DATEPRD'].max()
+
+        # Convert min_date and max_date to datetime.date objects
+        min_date = min_date.to_pydatetime().date()
+        max_date = max_date.to_pydatetime().date()
+
+        # Create a time range slider
+        start_date, end_date = st.slider(
+            'Select the date range',
+            min_value=min_date,
+            max_value=max_date,
+            value=(min_date, max_date),
+            format="YYYY-MM-DD"
+        )
+
+        # Filter the dataframe based on the selected date range
+        df_part3_filtered = df_part3[(df_part3['DATEPRD'] >= pd.to_datetime(start_date)) & 
+                                    (df_part3['DATEPRD'] <= pd.to_datetime(end_date))]
+
+        # Create scatter plot for oil production with Plotly
+        fig = px.scatter(df_part3_filtered, x='DATEPRD', y='oil_smoothed',
+                        labels={'DATEPRD': 'Date', 'oil_smoothed': 'Smoothed Oil Production'},
+                        title="Smoothed Oil Production of 15/9-F-14 within Selected Date Range")
+        # Apply custom styles for a glassy appearance and rounded edges
+        fig.update_layout(
+            plot_bgcolor='rgba(255, 255, 255, .9)',  # Glassy white background
+            paper_bgcolor='rgba(0, 71, 171, .5)',  # Semi-transparent white background
+            margin=dict(l=20, r=20, t=40, b=20),
+            font=dict(family="Arial", size=12, color="black"),
+            xaxis=dict(linecolor='black', linewidth=2, mirror=True),
+            yaxis=dict(linecolor='black', linewidth=2, mirror=True),
+            legend=dict(title='Model', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
+            title=dict(font=dict(size=16, color='black')),
+            hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
+            hovermode="closest"
+        )
+                # Custom HTML and CSS to create a container with rounded corners
+        rounded_corner_container = f"""
+        <div style='border-radius: 15px; overflow: hidden;'>
+            {fig.to_html()}
+        </div>
+        """
+        # Use Streamlit's HTML component to render the custom container
+        components.html(rounded_corner_container, height=600)
+        # Show Effect of Smoothing
+        st.subheader("Show Effect of Smoothing")
+
+                # Plotting the data with Plotly for smoothing effect
+        fig = px.line(df_part3_filtered, x="DATEPRD", y=["BORE_OIL_VOL", "oil_smoothed"],
+                    labels={'DATEPRD': 'Date', 'BORE_OIL_VOL': 'Original Oil Production', 'oil_smoothed': 'Smoothed Oil Production'},
+                    title="Oil Production and Smoothing Effect of 15/9-F-14")
+        fig.update_traces(mode='lines+markers')
+
+        # Apply custom styles for a glassy appearance and rounded edges
+        fig.update_layout(
+            plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
+            paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
+            margin=dict(l=20, r=20, t=40, b=20),
+            font=dict(family="Arial", size=12, color="black"),
+            xaxis=dict(linecolor='black', linewidth=2, mirror=True),
+            yaxis=dict(linecolor='black', linewidth=2, mirror=True),
+            legend=dict(title='Model', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
+            title=dict(font=dict(size=16, color='black')),
+            hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
+            hovermode="closest"
+        )
+
+        # Custom HTML and CSS to create a container with rounded corners
+        rounded_corner_container = f"""
+        <div style='border-radius: 15px; overflow: hidden;'>
+            {fig.to_html()}
+        </div>
+        """
+
+        # Use Streamlit's HTML component to render the custom container
+        components.html(rounded_corner_container, height=600)
+
+        # Curve-Fitting
+        st.subheader("Curve-Fitting")
+
+        # Filter the DataFrame for the specific well '15/9-F-14' and remove zero oil production entries
+        df_filtered = df[(df["NPD_WELL_BORE_NAME"] == '15/9-F-14') & (df["BORE_OIL_VOL"] != 0)]
+
+        # Calculate the days from the date for the specific well
+        df_filtered["days"] = (df_filtered["DATEPRD"] - df_filtered["DATEPRD"].min()).dt.days
+
+        # Apply rolling mean with a window size of 70 to smooth the oil volume data
+        df_filtered['oil_smoothed'] = df_filtered["BORE_OIL_VOL"].rolling(window=70, center=True).mean()
+        df_filtered = df_filtered[["oil_smoothed", "days"]].dropna()
+
+        # Get T and Q for fitting
+        T = df_filtered["days"]
+        Q = df_filtered["oil_smoothed"]
+
+        # Fit models
+        qi_exp, di_exp, _ = fit_model(exponential, T, Q)
+        qi_harm, di_harm, _ = fit_model(harmonic, T, Q)
+        qi_hyp, di_hyp, b_hyp = fit_model(hyperbolic, T, Q, p0=[1, 1, 1])
+
+        # Generate model curves
+        Q_exp = exponential(T, qi_exp, di_exp)
+        Q_harm = harmonic(T, qi_harm, di_harm)
+        Q_hyp = hyperbolic(T, qi_hyp, di_hyp, b_hyp)
+
+        # Dropdown for model selection in Streamlit
+        model_selected = st.selectbox('Select a model:', ['exponential', 'harmonic', 'hyperbolic', 'all'])
+
+        # Display the interactive plot based on the selected model
+        plot_model(T, Q, Q_exp, Q_harm, Q_hyp, model_selected)
+        
