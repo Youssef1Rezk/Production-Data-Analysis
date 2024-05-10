@@ -215,6 +215,7 @@ def plot_total_production_by_year_with_slider(df):
         paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
         margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
         font=dict(family="Arial", size=12, color="black"),
+        height=414 ,width=320,
         xaxis=dict(linecolor='black', linewidth=2, mirror=True),
         yaxis=dict(linecolor='black', linewidth=2, mirror=True),
         legend=dict(title='Production Type', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
