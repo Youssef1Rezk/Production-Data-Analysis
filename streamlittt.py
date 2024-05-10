@@ -178,6 +178,8 @@ def plot_production_profile(well_bore_code, df):
         hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
         hovermode="closest"
     )
+    fig.update_layout(autosize=True)
+
 
    # Convert the Plotly figure to HTML and store it in a variable
     fig_html = fig.to_html()
@@ -191,8 +193,7 @@ def plot_production_profile(well_bore_code, df):
 
     # Use Streamlit's HTML component to render the custom container
     components.html(rounded_corner_container, height=600,width=710)
-    st.plotly_chart(fig, use_container_width=True)
-
+    
 
 
 
