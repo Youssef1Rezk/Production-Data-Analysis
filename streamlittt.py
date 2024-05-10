@@ -286,8 +286,11 @@ def get_base64_of_bin_file(bin_file):
         data = file.read()
     return base64.b64encode(data).decode()
 
+# Create a sidebar radio button for navigation
+selected_page = st.sidebar.radio(
     "Navigation",
     ["Show Data", "Part 1", "Part 2","part 3"]
+)
 
 # Show Data page
 if selected_page == "Show Data":
