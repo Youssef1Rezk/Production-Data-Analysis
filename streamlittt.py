@@ -727,7 +727,11 @@ elif selected_page == "About the Project":
         This comprehensive dataset is a valuable resource for analysis and can be found on Kaggle.
         </div>
         """, unsafe_allow_html=True)
-        # Acknowledgment for Eng. Ahmed Abd Elgawad with LinkedIn and YouTube channel information
+        
+    st.markdown("https://www.kaggle.com/datasets/lamyalbert/volve-production-data")
+
+    # Acknowledgment for Eng. Ahmed Abd Elgawad with LinkedIn and YouTube channel information
+        
     st.markdown("""
         <h2 style='color: white; text-align: center;'>Acknowledgments</h2>
         <p style='color: white; text-align: center;'>
@@ -740,7 +744,8 @@ elif selected_page == "About the Project":
         <a href='https://www.youtube.com/@AhmedAbdElgawad-petroAnalyst' style='color: white;'>YouTube channel</a>.
         </p>
         <div style='text-align: center;'>
-            <img src='https://github.com/Youssef1Rezk/Production-Data-Analysis/blob/c66eff7657ed8cd1d513321001c378cf809769aa/photo_2024-05-10_08-56-10.jpg' 
+            <img src='https://raw.githubusercontent.com/Youssef1Rezk/Production-Data-Analysis/c66eff7657ed8cd1d513321001c378cf809769aa/photo_2024-05-10_08-56-10.jpg
+' 
             style='border-radius: 50%; width: 300px; height: 300px;'>
         </div>
         """, unsafe_allow_html=True)
