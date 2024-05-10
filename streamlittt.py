@@ -179,7 +179,7 @@ def plot_production_profile(well_bore_code, df):
         hovermode="closest"
     )
 
-    st.plotly_chart(fig, use_container_width=True,rounded_corner_container=True, height=400)
+    st.plotly_chart(fig, use_container_width=True, height=400,autosize=True)
 
 
 
