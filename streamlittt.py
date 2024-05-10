@@ -171,8 +171,6 @@ def plot_production_profile(well_bore_code, df):
         paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
         margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
         font=dict(family="Arial", size=12, color="black"),
-        height=1000,width=1000,
-        autosize=False,
         xaxis=dict(linecolor='black', linewidth=2, mirror=True),
         yaxis=dict(linecolor='black', linewidth=2, mirror=True),
         legend=dict(title='Production Type', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
@@ -181,7 +179,18 @@ def plot_production_profile(well_bore_code, df):
         hovermode="closest"
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+   # Convert the Plotly figure to HTML and store it in a variable
+    fig_html = fig.to_html()
+
+    # Custom HTML and CSS to create a container with rounded corners
+    rounded_corner_container = f"""
+    <div style='border-radius: 15px; overflow: hidden;'>
+        {fig_html}
+    </div>
+    """
+
+    # Use Streamlit's HTML component to render the custom container
+    components.html(rounded_corner_container, height=600,width=710)
 
 
 
@@ -215,7 +224,6 @@ def plot_total_production_by_year_with_slider(df):
         paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
         margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
         font=dict(family="Arial", size=12, color="black"),
-        height=414 ,width=320,
         xaxis=dict(linecolor='black', linewidth=2, mirror=True),
         yaxis=dict(linecolor='black', linewidth=2, mirror=True),
         legend=dict(title='Production Type', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
@@ -235,7 +243,7 @@ def plot_total_production_by_year_with_slider(df):
     """
 
     # Use Streamlit's HTML component to render the custom container
-    components.html(rounded_corner_container, height=414 ,width=320)
+    components.html(rounded_corner_container, height=600,width=710)
 
 # Define a function to plot total production by year with a date range slider
 def plot_total_production_by_year_with_slider2(df):
@@ -286,7 +294,7 @@ def plot_total_production_by_year_with_slider2(df):
     """
 
     # Use Streamlit's HTML component to render the custom container
-    components.html(rounded_corner_container, height=600 ,width=800)
+    components.html(rounded_corner_container, height=600,width=710)
 
 # Function to get base64 of the binary file
 def get_base64_of_bin_file(bin_file):
@@ -418,7 +426,7 @@ elif selected_page == "Part 2":
     """
 
     # Use Streamlit's HTML component to render the custom container
-    components.html(rounded_corner_container, height=600 ,width=800)
+    components.html(rounded_corner_container, height=600,width=710)
 
     # Title for the second plot selection
     st.subheader('Total production of each well [oil, water]')
@@ -463,7 +471,7 @@ elif selected_page == "Part 2":
     """
 
     # Use Streamlit's HTML component to render the custom container
-    components.html(rounded_corner_container, height=600 ,width=800)
+    components.html(rounded_corner_container, height=600,width=710)
     # Calculate GOR and create a new dataframe
     df['GOR'] = df['BORE_GAS_VOL'] / df['BORE_OIL_VOL']
     df7 = df[['DATEPRD', 'NPD_WELL_BORE_NAME', 'GOR']]
@@ -559,7 +567,7 @@ elif selected_page == "part 3":
         """
 
         # Use Streamlit's HTML component to render the custom container
-        components.html(rounded_corner_container, height=600 ,width=800)
+        components.html(rounded_corner_container, height=600,width=710)
         
 
     # Streamlit page configuration
@@ -631,7 +639,7 @@ elif selected_page == "part 3":
         </div>
         """
         # Use Streamlit's HTML component to render the custom container
-        components.html(rounded_corner_container, height=600 ,width=800)
+        components.html(rounded_corner_container, height=600,width=710)
         # Show Effect of Smoothing
         st.subheader("Show Effect of Smoothing")
 
@@ -676,7 +684,7 @@ elif selected_page == "part 3":
         """
 
         # Use Streamlit's HTML component to render the custom container
-        components.html(rounded_corner_container, height=600,width=800)
+        components.html(rounded_corner_container, height=600,width=710)
 
         # Curve-Fitting
         st.subheader("Curve-Fitting")
