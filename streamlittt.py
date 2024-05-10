@@ -170,6 +170,8 @@ def plot_production_profile(well_bore_code, df):
         plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
         paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
         margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
+        autosize=False,
+        height=600,width=400,
         font=dict(family="Arial", size=12, color="black"),
         xaxis=dict(linecolor='black', linewidth=2, mirror=True),
         yaxis=dict(linecolor='black', linewidth=2, mirror=True),
@@ -190,7 +192,7 @@ def plot_production_profile(well_bore_code, df):
     """
 
     # Use Streamlit's HTML component to render the custom container
-    components.html(rounded_corner_container, height=600,width=600)
+    components.html(rounded_corner_container, height=600,width=400)
 
 
 
