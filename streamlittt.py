@@ -191,6 +191,8 @@ def plot_production_profile(well_bore_code, df):
 
     # Use Streamlit's HTML component to render the custom container
     components.html(rounded_corner_container, height=600,width=710)
+    st.plotly_chart(fig, use_container_width=True)
+
 
 
 
@@ -315,7 +317,7 @@ if selected_page == "Show Data":
 
 # Part 1 page
 elif selected_page == "Part 1":
-    st.subheader('What is the contribution of each well in oil, gas, water production?')
+    st.markdown('<h2 style="color: white;">What is the contribution of each well in oil, gas, water production?</h2>', unsafe_allow_html=True)
     df2 = df[['NPD_WELL_BORE_NAME','BORE_OIL_VOL','BORE_GAS_VOL','BORE_WAT_VOL']]
     df3 = df2.groupby('NPD_WELL_BORE_NAME').sum().drop(index='15/9-F-4')
     for col in df3.columns:
