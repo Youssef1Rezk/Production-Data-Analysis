@@ -179,19 +179,7 @@ def plot_production_profile(well_bore_code, df):
         hovermode="closest"
     )
 
-   # Convert the Plotly figure to HTML and store it in a variable
-    fig_html = fig.to_html()
-
-    # Custom HTML and CSS to create a container with rounded corners
-    rounded_corner_container = f"""
-    <div style='border-radius: 15px; overflow: hidden;'>
-        {fig_html}
-    </div>
-    """
-
-    # Use Streamlit's HTML component to render the custom container
-    components.html(rounded_corner_container, height=400,width=600)
-    st.plotly_chart(fig, use_container_width=True,rounded_corner_container=True, height=800)
+    st.plotly_chart(fig, use_container_width=True,rounded_corner_container=True, height=400)
 
 
 
