@@ -15,6 +15,21 @@ from PIL import Image
 import requests
 from io import BytesIO
 import streamlit.components.v1 as components
+image = np.random.rand(128, 128, 3)  # A random color to demonstrate loading an image is not required
+
+st.markdown(
+    f"""
+    <style>
+    .reportview-container .main {{
+        background-image: url('https://raw.githubusercontent.com/Youssef1Rezk/Production-Data-Analysis/4d67db33134fdd724a62cbb5328163ac0b12e601/pexels-johannes-havn-835931-1716008.jpg') !important;
+        background-size: cover !important;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
 # Function to fetch image from a URL
 def add_bg_from_url():
     st.markdown(
