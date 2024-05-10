@@ -87,6 +87,7 @@ df['DATEPRD'] = pd.to_datetime(df['DATEPRD'])
 # Filter the dataframe to remove data associated with '15/9-F-4'
 filtered_df = df[df['WELL_BORE_CODE'] != '15/9-F-4']
 # Define the plotting function with time range slider
+@st.cache_data(experimental_allow_widgets=True)
 def plot_gor(well_bore_name, df7):
     # Get the date range for the selected well
     well_data = df7[df7['NPD_WELL_BORE_NAME'] == well_bore_name]
@@ -127,6 +128,7 @@ def plot_gor(well_bore_name, df7):
 
 
 # Define the plotting function with time range slider
+@st.cache_data(experimental_allow_widgets=True)
 def plot_production_profile(well_bore_code, df):
     # Get the date range for the selected well
     well_data = filtered_df[filtered_df['WELL_BORE_CODE'] == well_bore_code]
@@ -198,6 +200,7 @@ def plot_production_profile(well_bore_code, df):
 
 
 # Define a function to plot total production by year with a date range slider
+@st.cache_data(experimental_allow_widgets=True)
 def plot_total_production_by_year_with_slider(df):
     # Create a date range selection bar
     start_date_yearly, end_date_yearly = st.slider(
@@ -249,6 +252,7 @@ def plot_total_production_by_year_with_slider(df):
     components.html(rounded_corner_container, height=600,width=710)
 
 # Define a function to plot total production by year with a date range slider
+@st.cache_data(experimental_allow_widgets=True)
 def plot_total_production_by_year_with_slider2(df):
     # Create a date range selection bar
     start_date_yearly, end_date_yearly = st.slider(
@@ -343,6 +347,7 @@ elif selected_page == "Part 1":
 
 
 # Part 2 page
+
 elif selected_page == "Part 2":
     # Set a flag in session state to indicate the button has been pressed
     st.session_state['part2_active'] = True
@@ -503,6 +508,7 @@ elif selected_page == "Part 2":
 # Part 3 page
 elif selected_page == "part 3":
         # Define the outlier_treatment function
+    @st.cache_data(experimental_allow_widgets=True)
     def outlier_treatment(datacolumn):
         sorted(datacolumn)
         Q1, Q3 = np.percentile(datacolumn, [25, 75])
@@ -535,6 +541,7 @@ elif selected_page == "part 3":
         return qi, di, b
 
     # Plotting function with Plotly for curve fitting models
+    @st.cache_data(experimental_allow_widgets=True)
     def plot_model(T, Q, Q_exp, Q_harm, Q_hyp, model):
         fig = px.line()
         fig.add_scatter(x=T, y=Q, mode='lines', name='Smoothed', line=dict(color='green'))
