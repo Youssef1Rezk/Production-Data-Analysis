@@ -16,7 +16,22 @@ import requests
 from io import BytesIO
 import streamlit.components.v1 as components
 
+# Function to fetch image from a URL
+def add_bg_from_url():
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("https://raw.githubusercontent.com/Youssef1Rezk/Production-Data-Analysis/2b8b49a8370e73a47617460edadebfc13b5e386b/6436964_3293677.jpg");
+            background-size: cover;
+            background-position: center;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
+add_bg_from_url()
 # Load the data
 # GitHub raw content URL of the Excel file
 excel_file_url = 'https://raw.githubusercontent.com/Youssef1Rezk/Production-Data-Analysis/main/Volve%20production%20data.xlsx'
