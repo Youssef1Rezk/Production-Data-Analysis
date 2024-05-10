@@ -288,7 +288,6 @@ def get_base64_of_bin_file(bin_file):
 
     "Navigation",
     ["Show Data", "Part 1", "Part 2","part 3"]
-)
 
 # Show Data page
 if selected_page == "Show Data":
