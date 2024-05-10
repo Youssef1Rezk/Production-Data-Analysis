@@ -171,6 +171,8 @@ def plot_production_profile(well_bore_code, df):
         paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
         margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
         font=dict(family="Arial", size=12, color="black"),
+        height=350,width=414,
+        autosize=False,
         xaxis=dict(linecolor='black', linewidth=2, mirror=True),
         yaxis=dict(linecolor='black', linewidth=2, mirror=True),
         legend=dict(title='Production Type', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
@@ -179,7 +181,7 @@ def plot_production_profile(well_bore_code, df):
         hovermode="closest"
     )
 
-    st.plotly_chart(fig, use_container_width=True, autosize=True)
+    st.plotly_chart(fig, use_container_width=True)
 
 
 
