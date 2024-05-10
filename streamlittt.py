@@ -172,7 +172,7 @@ def plot_production_profile(well_bore_code, df):
         margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
         font=dict(family="Arial", size=12, color="black"),
         height=1000,width=500,
-        autosize=False,
+        autosize=True,
         xaxis=dict(linecolor='black', linewidth=2, mirror=True),
         yaxis=dict(linecolor='black', linewidth=2, mirror=True),
         legend=dict(title='Production Type', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
