@@ -1,7 +1,7 @@
 # import the libraries
 import pandas as pd 
 import numpy as np 
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 import seaborn as sns 
 import streamlit as st
 import plotly.express as px
@@ -16,17 +16,16 @@ import requests
 from io import BytesIO
 import streamlit.components.v1 as components
 image = np.random.rand(128, 128, 3)  # A random color to demonstrate loading an image is not required
-
-
-# Function to fetch image from a URL
+@st.cache_data
 def add_bg_from_url():
     st.markdown(
         f"""
         <style>
-        .stApp {{
+        .main {{
             background-image: url("https://raw.githubusercontent.com/Youssef1Rezk/Production-Data-Analysis/2b8b49a8370e73a47617460edadebfc13b5e386b/6436964_3293677.jpg");
             background-size: cover;
             background-position: center;
+            background-attachment: local;
         }}
         </style>
         """,
@@ -34,6 +33,8 @@ def add_bg_from_url():
     )
 
 add_bg_from_url()
+
+
 
 # Load the data
 # GitHub raw content URL of the Excel file
@@ -76,15 +77,16 @@ df['DATEPRD'] = pd.to_datetime(df['DATEPRD'])
 filtered_df = df[df['WELL_BORE_CODE'] != '15/9-F-4']
 # Define the plotting function with time range slider
 
-def plot_gor(well_bore_name, df7):
+@st.cache_data(experimental_allow_widgets=True)
+def get_well_data(well_bore_name, df7):
     # Get the date range for the selected well
     well_data = df7[df7['NPD_WELL_BORE_NAME'] == well_bore_name]
-    min_date = well_data['DATEPRD'].min()
-    max_date = well_data['DATEPRD'].max()
+    return well_data
 
-    # Convert min_date and max_date to datetime.date objects
-    min_date = min_date.to_pydatetime().date()
-    max_date = max_date.to_pydatetime().date()
+def plot_gor(well_bore_name, df7):
+    well_data = get_well_data(well_bore_name, df7)
+    min_date = well_data['DATEPRD'].min().to_pydatetime().date()
+    max_date = well_data['DATEPRD'].max().to_pydatetime().date()
 
     # Create a time range slider
     start_date, end_date = st.slider(
@@ -116,78 +118,65 @@ def plot_gor(well_bore_name, df7):
 
 
 # Define the plotting function with time range slider
+@st.cache_data(experimental_allow_widgets=True)
+def fetch_data(df, well_bore_code):
+    return df[df['WELL_BORE_CODE'] == well_bore_code]
 
 def plot_production_profile(well_bore_code, df):
-    # Get the date range for the selected well
-    well_data = filtered_df[filtered_df['WELL_BORE_CODE'] == well_bore_code]
-    min_date = well_data['DATEPRD'].min()
-    max_date = well_data['DATEPRD'].max()
+    well_data = fetch_data(df, well_bore_code)  # Fetch data using cached function
+    min_date = well_data['DATEPRD'].min().to_pydatetime().date()
+    max_date = well_data['DATEPRD'].max().to_pydatetime().date()
 
-    # Convert min_date and max_date to datetime.date objects
-    min_date = min_date.to_pydatetime().date()
-    max_date = max_date.to_pydatetime().date()
-    
-    # Create a time range slider with a unique key using key_suffix
     start_date, end_date = st.slider(
         'Select the date range',
         min_value=min_date,
         max_value=max_date,
         value=(min_date, max_date),
         format="YYYY-MM-DD",
-        key=f'date_range_slider_{well_bore_code}'  # Unique key for the slider
+        key=f'date_range_slider_{well_bore_code}'
     )
-    
-    # Convert start_date and end_date to the same type as 'DATEPRD'
+
     start_date = pd.to_datetime(start_date)
     end_date = pd.to_datetime(end_date)
 
-    # Filter the data based on the selected date range
     filtered_data = well_data[(well_data['DATEPRD'] >= start_date) & (well_data['DATEPRD'] <= end_date)]
-    # Define colors for each type of production volume
     colors = {'BORE_OIL_VOL': 'orange', 'BORE_WAT_VOL': 'blue'}
-    # Plotting the production profile with Plotly
     fig = px.line(filtered_data, x='DATEPRD', y=['BORE_OIL_VOL', 'BORE_WAT_VOL'],
                   labels={'DATEPRD': 'Date', 'value': 'Volume', 'variable': 'Type'},
                   title=f"Production Profile for Well: {well_bore_code}",color_discrete_map=colors)
     
-    # Update traces to customize the appearance
     fig.update_traces(line=dict(width=2))
     fig.for_each_trace(lambda t: t.update(name=t.name.replace("BORE_OIL_VOL=", "Oil Volume")))
     fig.for_each_trace(lambda t: t.update(name=t.name.replace("BORE_WAT_VOL=", "Water Volume")))
     
-    # Update layout to control the size and position
     fig.update_layout(
-        plot_bgcolor='rgba(255, 255, 255, 0.9)',  # Glassy white background
-        paper_bgcolor='rgba(0, 71, 171, 0.5)',  # Semi-transparent blue background
-        margin=dict(l=50, r=20, t=50, b=40),  # Adjust margins to fit the chart within the frame
+        plot_bgcolor='rgba(255, 255, 255, 0.9)',
+        paper_bgcolor='rgba(0, 71, 171, 0.5)',
+        margin=dict(l=50, r=20, t=50, b=40),
         font=dict(family="Arial", size=12, color="white"),
         xaxis=dict(linecolor='black', linewidth=2, mirror=True),
         yaxis=dict(linecolor='black', linewidth=2, mirror=True),
         legend=dict(title='Production Type', bgcolor='rgba(255, 255, 255, 0.4)', bordercolor='black', borderwidth=2),
         title=dict(font=dict(size=16, color='white')),
         hoverlabel=dict(bgcolor='white', font_size=12, font_family="Arial"),
-        hovermode="closest"
+        hovermode="closest",
+        autosize=True,
     )
-    fig.update_layout(autosize=True)
 
-
-   # Convert the Plotly figure to HTML and store it in a variable
     fig_html = fig.to_html()
-
-    # Custom HTML and CSS to create a container with rounded corners
     rounded_corner_container = f"""
     <div style='border-radius: 15px; overflow: hidden;'>
         {fig_html}
     </div>
     """
 
-    # Use Streamlit's HTML component to render the custom container
     components.html(rounded_corner_container, height=600,width=710)
-    
 
 
 
-# Define a function to plot total production by year with a date range slider
+@st.cache_data(experimental_allow_widgets=True)
+def fetch_filtered_data(df, start_date, end_date):
+    return df[(df['DATEPRD'] >= pd.to_datetime(start_date)) & (df['DATEPRD'] <= pd.to_datetime(end_date))]
 
 def plot_total_production_by_year_with_slider(df):
     # Create a date range selection bar
@@ -200,11 +189,10 @@ def plot_total_production_by_year_with_slider(df):
         key='date_range_slider_total_production'  # Unique key for the slider
     )
 
-    # Filter the dataframe based on the selected date range
-    filtered_df_yearly = df[(df['DATEPRD'] >= pd.to_datetime(start_date_yearly)) & 
-                        (df['DATEPRD'] <= pd.to_datetime(end_date_yearly))]
+    # Fetch filtered data using caching mechanism
+    filtered_df_yearly = fetch_filtered_data(df, start_date_yearly, end_date_yearly)
 
-   # Group by year and sum the oil and water production
+    # Group by year and sum the oil and water production
     production_by_year = filtered_df_yearly.groupby(filtered_df_yearly["DATEPRD"].dt.year)[["BORE_OIL_VOL", "BORE_WAT_VOL"]].sum().reset_index()
     # Define colors for each type of production volume
     colors = {'BORE_OIL_VOL': 'orange', 'BORE_WAT_VOL': 'blue'}
@@ -238,8 +226,10 @@ def plot_total_production_by_year_with_slider(df):
 
     # Use Streamlit's HTML component to render the custom container
     components.html(rounded_corner_container, height=600,width=710)
-
 # Define a function to plot total production by year with a date range slider
+@st.cache_data(experimental_allow_widgets=True)
+def fetch_filtered_data(df, start_date, end_date):
+    return df[(df['DATEPRD'] >= pd.to_datetime(start_date)) & (df['DATEPRD'] <= pd.to_datetime(end_date))]
 
 def plot_total_production_by_year_with_slider2(df):
     # Create a date range selection bar
@@ -249,6 +239,7 @@ def plot_total_production_by_year_with_slider2(df):
         max_value=df['DATEPRD'].max().to_pydatetime().date(),
         value=(df['DATEPRD'].min().to_pydatetime().date(), df['DATEPRD'].max().to_pydatetime().date()),
         format="YYYY-MM-DD"
+        
     )
 
     # Filter the dataframe based on the selected date range
@@ -292,6 +283,7 @@ def plot_total_production_by_year_with_slider2(df):
     components.html(rounded_corner_container, height=600,width=710)
 
 # Function to get base64 of the binary file
+@st.cache_data
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as file:
         data = file.read()
@@ -506,18 +498,22 @@ elif selected_page == "part 3":
         return lower_range, upper_range
 
     # Exponential model function
+    @st.cache_data
     def exponential(t, qi, di):
         return qi * np.exp(-di * t)
 
     # Harmonic model function
+    @st.cache_data
     def harmonic(t, qi, di):
         return qi / (1 + di * t)
 
     # Hyperbolic model function
+    @st.cache_data
     def hyperbolic(t, qi, di, b):
         return qi / ((1 + b * di * t)**(1/b))
 
     # Fitting function
+    
     def fit_model(model_func, T, Q, p0=None):
         T_normalized = T / max(T)
         Q_normalized = Q / max(Q)
